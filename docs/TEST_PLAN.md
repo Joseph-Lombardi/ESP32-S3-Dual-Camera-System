@@ -4,7 +4,7 @@
 
 ## Recover before claiming a reproducible hardware release
 
-The capture sketch has now been supplied. Confirm it matches the successful run, obtain the complete installed Arducam library snapshot, board/core settings and original camera JPEGs. Record hashes and versions. Reconcile actual camera-2 wiring with the source. Retain the original implementation before introducing improvements.
+The capture sketch and replacement Arducam Mega `src` have now been supplied and identified by the author. Record the installed library metadata, board/core settings and original camera JPEGs, then rerun the pair capture. Record hashes and versions. Reconcile actual camera-2 wiring with the source. Retain the original implementation before introducing improvements.
 
 ## Proposed bench campaign
 

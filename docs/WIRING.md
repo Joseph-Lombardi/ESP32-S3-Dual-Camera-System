@@ -25,7 +25,7 @@ Camera module nominal resolution is not the resolution of this test: previews sh
 | MOSI | GPIO11 | GPIO18 |
 | CS | GPIO10 | GPIO21 |
 
-The author confirmed the independent-bus architecture in the corrected package. These GPIOs match the preserved `ArducamSpi.cpp` and corrected project context. The exact final flashed capture sketch and library remain unavailable, so verify the physical wiring against that final source before claiming exact reproduction.
+The author confirmed the independent-bus architecture in the corrected package. These GPIOs match the preserved `ArducamSpi.cpp` and corrected project context. The capture sketch and replacement library source have since been supplied by the author. Both document the same separate SPI mappings. Board/core settings and a hardware rerun remain to be recorded.
 
 Ring 1 data uses GPIO4 and ring 2 uses GPIO5, with eight LEDs per ring. The reference sketch tests the rings separately from camera capture.
 

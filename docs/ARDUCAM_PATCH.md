@@ -1,10 +1,10 @@
-# Arducam library modification: exact archived experiment
+# Arducam Mega library modification: author-supplied source
 
 [Back to project](../README.md)
 
 ## Provenance and validation boundary
 
-The supplied package contains a locally modified Arducam source snapshot and an initialization-only sketch. Its `LEEME_PI_LOM.txt` explicitly says it was **not physically validated or compiled in Arduino IDE**. It uses two independent SPI buses; it must not be presented as the final successful independent-SPI firmware.
+The author has supplied `src(2).zip` and identified it as the replacement for the installed Arducam Mega library’s `src` folder. All 14 files match the previously preserved source byte for byte. The earlier `LEEME_PI_LOM.txt` belongs to the initialization-only diagnostic archive and records its status at packaging time. That historical note does not mean the newly supplied capture sketch is missing. No compilation or hardware rerun was performed for this publication.
 
 For an auditable comparison, the snapshot was compared with official upstream **ArduCAM/Arducam_Mega** at commit [`146e058b1b5e57bd0d2c64885d0642390e11b6b1`](https://github.com/ArduCAM/Arducam_Mega/tree/146e058b1b5e57bd0d2c64885d0642390e11b6b1), retrieved on 2026-11-19. Upstream `library.properties` identifies version 3.0.0. This is a comparison baseline; it does not prove which release the original local installation came from.
 
@@ -30,4 +30,4 @@ This is one active selection at a time. The code does not establish thread safet
 - `library.properties` was added from the inspected upstream baseline with a distinct experimental display name and description. This is packaging metadata, not a claim that the archive has been built or tested.
 - `LEEME_PI_LOM.txt` is retained as the original Spanish archive note.
 
-The independent FSPI/HSPI architecture agrees with the corrected project notes. No final capture implementation was synthesized to fill the missing-source gap. The author has since supplied the [capture sketch](../firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino). The exact deployed library snapshot and board settings still need confirmation before an exact reproduction is possible.
+The independent FSPI/HSPI architecture agrees with the corrected project notes. No final capture implementation was synthesized to fill the missing-source gap. The author has since supplied the [capture sketch](../firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino). The replacement library source has now also been identified by the author. The upstream installed library version, board/core settings and a new hardware run remain to be recorded.
