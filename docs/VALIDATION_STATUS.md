@@ -8,12 +8,18 @@
 |---|---|---|---|
 | Two-camera initialization | Both status values `0`; `AMBAS CAMARAS LISTAS` | Exact flashed sketch missing | Stable cold starts or root cause of earlier failures |
 | Dual-camera local reception | One pair and byte counts in Python terminal; two previews | Receiver now supplied directly by author in chat | Exact original file bytes or hardware rerun of normalized receiver |
-| Shared-SPI arrangement | Author's wiring report, reflected in TRL4 | Final shared-SPI firmware/library not found | Exact deployed bus initialization and driver patch |
+| Independent SPI buses | Explicit author correction in the replacement ZIP; separate GPIO maps in archived driver | Final capture firmware/library not identified | Exact final pin map, initialization and deployed patch |
 | FSPI/HSPI patch | Actual source snapshot | Preserved, diffed against official upstream | Compile success or successful physical use |
 | Dual-ring illumination | Bench photograph | ZIP contains reference-only sketch | Exact illumination firmware, capture synchronization or optical performance |
 | MPU6050 | Earlier I²C detection/readings reported | No synchronized run supplied | Per-image angle/accuracy |
 | Dual cameras over LoRa | No integrated evidence | Other LoRaVision code is a different configuration | Dual-camera end-to-end wireless operation |
 | Marine deployment / energy / app / AI | Future architecture | Not demonstrated by these records | Autonomy, underwater use or classification performance |
+
+## Architecture correction — 2026-11-19
+
+The replacement `ESP32S3_DualCam_Portfolio_CORREGIDO(1).zip` explicitly corrects the earlier package: **the cameras use independent SPI GPIOs**. CAM1 is documented as SCK12/MISO13/MOSI11/CS10 and CAM2 as SCK16/MISO17/MOSI18/CS21 in the preserved FSPI/HSPI driver. Earlier portfolio statements describing a shared signal bus were incorrect and are superseded by this correction. The README, diagram, wiring and supporting guides have been corrected consistently.
+
+All firmware bytes and the eight retained evidence images were compared with the replacement ZIP and match. The additional TRL3 page screenshot is background context about a separate telemetry experiment, rather than dual-camera test evidence. The receiver previously supplied separately by the author is retained; its absence from this staging ZIP does not invalidate that source recovery. The exact final flashed camera firmware and library are still missing.
 
 ## Recovery performed on 2026-11-19
 
@@ -22,7 +28,7 @@
 - Inspected the university repository's current tracked paths and available fetched branch/history path names for Arducam, dual-camera and receiver artifacts. No final camera sketch or library source was found there.
 - Inspected the related personal [LoRaVision repository](https://github.com/Joseph-Lombardi/LoRaVision). Its single-camera Heltec capture and LoRa receiver use different pin mappings and protocol; they are not substituted for this dual-camera firmware.
 - Recovered the receiver from the author's new chat paste. Normalized Markdown escapes, whitespace, `__name__` formatting and a visibly corrupted filename regex to `r"camara[12]_(\d+)\.jpg"`. Preserved protocol, constants, Spanish console output and error-handling logic. The result is not a byte-for-byte copy of an original uploaded `.py` file.
-- Compared the 14 archived library source files to official upstream commit `146e058b1b5e57bd0d2c64885d0642390e11b6b1`: 12 identical, two modified. The final shared-bus patch remains unrecovered.
+- Compared the 14 archived library source files to official upstream commit `146e058b1b5e57bd0d2c64885d0642390e11b6b1`: 12 identical, two modified. The final independent-bus patch remains unrecovered.
 
 The university documentation is preserved as a group record. This personal repository updates source availability locally without rewriting that historical README.
 
@@ -32,7 +38,7 @@ The host-only test results and runtime are appended after execution below. These
 
 ## Missing for a turnkey release
 
-1. Exact final shared-SPI Arduino capture sketch.
+1. Exact final independent-SPI Arduino capture sketch.
 2. Complete exact library snapshot used for the successful run, including version and patch provenance.
 3. Board/core versions, USB settings and a confirmed schematic.
 4. Original `camara1_0001.jpg` / `camara2_0001.jpg`, raw serial dumps and per-attempt logs.

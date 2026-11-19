@@ -14,19 +14,22 @@
 
 Camera module nominal resolution is not the resolution of this test: previews show 640 × 480. Component revisions, USB bridge type and power budget were not archived.
 
-## Two configurations that must not be mixed
+## Independent SPI buses
 
-| Signal | Reported successful shared-SPI bench | Archived experimental FSPI/HSPI source |
-|---|---|---|
-| CAM1 SCK / MISO / MOSI | GPIO12 / GPIO13 / GPIO11 | GPIO12 / GPIO13 / GPIO11 |
-| CAM1 CS | GPIO10 | GPIO10 |
-| CAM2 SCK / MISO / MOSI | GPIO12 / GPIO13 / GPIO11 | GPIO16 / GPIO17 / GPIO18 |
-| CAM2 CS | GPIO21 | GPIO21 |
-| Ring 1 / ring 2 data | GPIO4 / GPIO5 reported | Reference LED sketch uses GPIO4 / GPIO5 separately |
-| Source of mapping | Author's bench context and university TRL4 | Actual `ArducamSpi.cpp` in this archive |
-| Reproduction status | Final firmware/library missing | Source retained; not compiled or hardware verified here |
+**Each camera has its own SCK, MISO, MOSI and CS GPIOs.** Both cameras connect to one ESP32-S3.
 
-In a shared-bus design, camera selection uses separate CS lines and only the selected device should drive the bus. This design intent does not prove the actual deployed driver's timing or final initialization sequence. The experimental driver holds both CS lines high, then selects a bus and lowers the requested CS. It is a single-active-camera implementation, not a concurrent transfer engine.
+| Signal | CAM1 (FSPI) | CAM2 (HSPI) |
+|---|---:|---:|
+| SCK | GPIO12 | GPIO16 |
+| MISO | GPIO13 | GPIO17 |
+| MOSI | GPIO11 | GPIO18 |
+| CS | GPIO10 | GPIO21 |
+
+The author confirmed the independent-bus architecture in the corrected package. These GPIOs match the preserved `ArducamSpi.cpp` and corrected project context. The exact final flashed capture sketch and library remain unavailable, so verify the physical wiring against that final source before claiming exact reproduction.
+
+Ring 1 data uses GPIO4 and ring 2 uses GPIO5, with eight LEDs per ring. The reference sketch tests the rings separately from camera capture.
+
+The archived driver holds both CS lines high, selects the corresponding FSPI/HSPI bus and lowers the requested camera's CS. It implements one active camera selection at a time; independent buses do not establish concurrent transfers or simultaneous exposure.
 
 Cameras were reported powered from 5 V and shared ground. Ring supply wiring, level adaptation, current capacity, decoupling and cable lengths are not adequately recorded to publish a complete electrical schematic. Check the actual board and module documentation before wiring; the reported supply voltage does not imply 5 V tolerance of ESP32 GPIOs. Do not derive a power design from the photographs.
 

@@ -6,7 +6,7 @@
 
 | Goal | Artifact | Availability |
 |---|---|---|
-| Reproduce the successful shared-SPI photo pair | Exact final capture sketch + exact final library | Not recovered; no substitute supplied |
+| Reproduce the successful independent-SPI photo pair | Exact final capture sketch + exact final library | Not recovered; no substitute supplied |
 | Inspect/run the archived two-bus initialization experiment | `firmware/experimental_dual_bus/` | Source available, unverified; does not implement the photo protocol |
 | Exercise a dual-ring example | `firmware/led_ring_demo/led_ring_demo.ino` | Reference example, not the exact lab sketch |
 | Receive a pair from compatible capture firmware | `python/recibir_foto.py` | Supplied by author; hardware rerun still needed |
@@ -52,7 +52,7 @@ If reception fails, the script stops the capture loop rather than attempting to 
 
 ## Experimental Arduino library setup
 
-This procedure is provided for source inspection and future validation, not as proof of a working shared-SPI build.
+This procedure is provided for source inspection and future validation, not as proof of a working independent-SPI build.
 
 1. Read [the patch analysis](ARDUCAM_PATCH.md) and select the **experimental two-bus wiring** in [WIRING.md](WIRING.md).
 2. Install the ESP32 board support through Arduino IDE's Boards Manager and select the actual ESP32-S3 board. Record the chosen core version and settings in the test log; there is no validated pinned core configuration in this archive.
@@ -61,7 +61,7 @@ This procedure is provided for source inspection and future validation, not as p
 5. Compile first and retain the full build output. No compile success is asserted by this repository. Only upload after checking wiring and power.
 6. The sketch prints initialization diagnostics and loops idle. It does **not** emit `READY`, process `F`, capture JPEGs or drive the Python receiver.
 
-The archived library owns SPI initialization internally. Do not add a separate shared-bus `SPI.begin(...)` to that sketch and assume it controls this FSPI/HSPI driver.
+The archived library owns SPI initialization internally. A separate global `SPI.begin(...)` call does not configure both internal FSPI/HSPI objects; inspect the actual driver initialization.
 
 ## LED reference example
 

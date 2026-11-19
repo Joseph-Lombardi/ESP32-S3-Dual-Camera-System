@@ -4,7 +4,7 @@
 
 ## Recover before claiming a reproducible hardware release
 
-Obtain the exact successful shared-SPI sketch, the complete installed Arducam library snapshot, board/core settings and original camera JPEGs. Record hashes and versions. Reconcile actual camera-2 wiring with the source. Retain the original implementation before introducing improvements.
+Obtain the exact successful independent-SPI sketch, the complete installed Arducam library snapshot, board/core settings and original camera JPEGs. Record hashes and versions. Reconcile actual camera-2 wiring with the source. Retain the original implementation before introducing improvements.
 
 ## Proposed bench campaign
 

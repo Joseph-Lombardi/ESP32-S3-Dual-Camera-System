@@ -4,7 +4,7 @@
 
 ## Provenance and validation boundary
 
-The supplied package contains a locally modified Arducam source snapshot and an initialization-only sketch. Its `LEEME_PI_LOM.txt` explicitly says it was **not physically validated or compiled in Arduino IDE**. It uses two independent SPI buses; it must not be presented as the final successful shared-SPI firmware.
+The supplied package contains a locally modified Arducam source snapshot and an initialization-only sketch. Its `LEEME_PI_LOM.txt` explicitly says it was **not physically validated or compiled in Arduino IDE**. It uses two independent SPI buses; it must not be presented as the final successful independent-SPI firmware.
 
 For an auditable comparison, the snapshot was compared with official upstream **ArduCAM/Arducam_Mega** at commit [`146e058b1b5e57bd0d2c64885d0642390e11b6b1`](https://github.com/ArduCAM/Arducam_Mega/tree/146e058b1b5e57bd0d2c64885d0642390e11b6b1), retrieved on 2026-11-19. Upstream `library.properties` identifies version 3.0.0. This is a comparison baseline; it does not prove which release the original local installation came from.
 
@@ -30,4 +30,4 @@ This is one active selection at a time. The code does not establish thread safet
 - `library.properties` was added from the inspected upstream baseline with a distinct experimental display name and description. This is packaging metadata, not a claim that the archive has been built or tested.
 - `LEEME_PI_LOM.txt` is retained as the original Spanish archive note.
 
-No successful shared-bus implementation was synthesized to fill the missing-source gap. The final flashed sketch, final patch and board settings still need to be supplied before an exact reproduction is possible.
+The independent FSPI/HSPI architecture agrees with the corrected project notes. No final capture implementation was synthesized to fill the missing-source gap. The final flashed sketch, final patch and board settings still need to be supplied before an exact reproduction is possible.
