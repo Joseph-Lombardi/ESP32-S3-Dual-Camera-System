@@ -10,7 +10,7 @@ Embedded imaging case study by **Joseph Lombardi Quispe**, developed within the 
 
 This repository documents my work integrating two Arducam Mega cameras with a single ESP32-S3 controller: camera selection, SPI debugging, LED control and host-side JPEG reconstruction. It preserves the engineering evidence, the supplied Python receiver and an experimental library modification with a reviewable upstream diff.
 
-**Current release status:** one JPEG pair was received over USB serial and opened on the PC. The exact successful independent-SPI firmware and library snapshot have not been recovered. The included FSPI/HSPI experiment is a separate, unverified variant. This is an engineering case study with partial source recovery, rather than a complete turnkey firmware release.
+**Current release status:** one JPEG pair was received over USB serial and opened on the PC. The author has now supplied the [USB capture sketch](firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino). It implements sequential VGA JPEG capture from both cameras and the receiver’s serial protocol. The exact library snapshot deployed in the successful run is still unconfirmed; the archived FSPI/HSPI driver remains available for inspection. No firmware compilation or hardware rerun was performed for this publication.
 
 [Hardware & wiring](docs/WIRING.md) · [Installation](docs/INSTALLATION.md) · [Library changes](docs/ARDUCAM_PATCH.md) · [Serial protocol](docs/SERIAL_PROTOCOL.md) · [Validation](docs/VALIDATION_STATUS.md) · [Evidence gallery](docs/EVIDENCE.md)
 
@@ -38,7 +38,7 @@ flowchart TD
     MCU -.->|"GPIO4 / GPIO5; separate bench test"| LED["Two LED rings"]
 ```
 
-The author confirms that the working arrangement uses **two independent SPI buses, each with its own SCK, MISO, MOSI and CS GPIOs**, on one ESP32-S3. The archived experiment implements FSPI for CAM1 and HSPI for CAM2. Its exact pin map is documented below; matching the final flashed firmware to that archive remains pending. The log receives CAM1 before CAM2: **two images per request does not imply simultaneous exposure**. See the [wiring guide](docs/WIRING.md).
+The author confirms that the working arrangement uses **two independent SPI buses, each with its own SCK, MISO, MOSI and CS GPIOs**, on one ESP32-S3. The archived experiment implements FSPI for CAM1 and HSPI for CAM2. Its exact pin map is documented below; matching the newly supplied capture sketch and archived library to the exact build used in the recorded run remains pending. The log receives CAM1 before CAM2: **two images per request does not imply simultaneous exposure**. See the [wiring guide](docs/WIRING.md).
 
 LanternGuard's intended field architecture adds an underwater enclosure, an inclinometer, a cable to a buoy and a LoRa uplink. Those additions are not validated as an integrated system by the evidence here.
 
@@ -73,7 +73,8 @@ The recorded request completed as `Pareja 0001 recibida`. Both images were opene
 | [Python receiver](python/recibir_foto.py) | Supplied by the project author in this session; formatting repaired, host tests included |
 | [FSPI/HSPI source archive](firmware/experimental_dual_bus/README.md) | Preserved experimental source; not hardware validated or compiled here |
 | [LED reference sketch](firmware/led_ring_demo/led_ring_demo.ino) | Example supplied in the ZIP; not the exact archived illumination-test firmware |
-| Final independent-SPI firmware and exact successful patch | Not found in the supplied package or inspected university source/history |
+| [USB capture firmware](firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino) | Supplied by the author after publication; statically reviewed, not compiled or rerun here |
+| Exact library build used in the successful run | Still unconfirmed; archived FSPI/HSPI source is preserved |
 | [Offline JPEG utility](python/jpeg_extract_reference.py) | Reference-only utility, separate from the authentic receiver |
 
 The full [validation and recovery record](docs/VALIDATION_STATUS.md) explains what was checked. Host tests exercise synthetic serial data; they do not reproduce the hardware experiment. No compile success, endurance, energy consumption, simultaneous exposure or integrated dual-camera LoRa result is asserted.
@@ -93,8 +94,8 @@ Cameras were reported powered from 5 V with a common ground. The [wiring guide](
 
 ## Getting started
 
-1. Read the [source status](docs/VALIDATION_STATUS.md) and [installation guide](docs/INSTALLATION.md). There is no final independent-SPI capture sketch in this release. The archived two-bus sketch only tests initialization; it cannot drive the receiver's capture protocol.
-2. To use the Python receiver, obtain the matching capture firmware, configure `PUERTO` in `python/recibir_foto.py` and install its dependency:
+1. Read the [source status](docs/VALIDATION_STATUS.md) and [installation guide](docs/INSTALLATION.md). Use `firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino` for the author-supplied capture logic. The separate archived two-bus sketch only tests initialization.
+2. To use the Python receiver, compile and upload the capture sketch with the matching Dual SPI library, configure `PUERTO` in `python/recibir_foto.py` and install its dependency:
 
    ```bash
    python -m venv .venv
@@ -126,7 +127,7 @@ python -m unittest discover -s tests -v
 - **Inspect initialization lifecycle and CS state.** The archived patch defers SPI initialization from camera construction and keeps inactive CS lines high. Its routing code selects FSPI or HSPI according to the active CS. The diff records the exact changes available; it does not prove which change fixed the final independent-bus setup.
 - **Drain the announced frame before parsing more text.** The receiver reads all `N` bytes, then expects `END <camera>`. Extracting only up to JPEG EOI from the serial port would leave trailing bytes to interfere with the next header.
 - **Check image quality separately from transfer success.** A saved and viewable image confirms useful progress; darkness and orientation still require controlled lighting and mounting tests.
-- **Preserve the boundary between evidence and source.** A working screenshot does not identify the library build used on the board. Recovery of the final sketch and modified library remains an open reproducibility task.
+- **Preserve the boundary between evidence and source.** The capture sketch is now supplied, but a working screenshot does not identify the exact library build used on the board. Confirming that build and the board settings remains an open reproducibility task.
 
 More detail: [debugging log](docs/DEBUGGING.md), [protocol limitations](docs/SERIAL_PROTOCOL.md), [test plan](docs/TEST_PLAN.md).
 
@@ -134,6 +135,7 @@ More detail: [debugging log](docs/DEBUGGING.md), [protocol limitations](docs/SER
 
 | Path | Purpose |
 |---|---|
+| `firmware/dual_camera_usb_capture/` | Author-supplied two-camera VGA JPEG capture and USB serial commands |
 | `firmware/experimental_dual_bus/` | Archived two-bus initialization experiment, source snapshot, MIT notice and upstream diff |
 | `firmware/led_ring_demo/` | Reference-only dual-ring example |
 | `python/recibir_foto.py` | Author-supplied serial receiver with normalized chat formatting |
@@ -152,4 +154,4 @@ Arducam's original camera library is credited to **Arducam Technology co., Ltd.*
 
 ## Next milestones
 
-Recover the exact working independent-SPI sketch and library; retain original JPEGs and serial dumps; investigate the bytes outside each JPEG; measure illumination and energy; repeat capture pairs with timestamps; then integrate inclination sensing and the buoy radio link. Underwater operation, autonomous solar power, storage application and biofouling/tear classification remain future integration work.
+Confirm the exact deployed Dual SPI library and board settings for the supplied capture sketch; retain original JPEGs and serial dumps; investigate the bytes outside each JPEG; measure illumination and energy; repeat capture pairs with timestamps; then integrate inclination sensing and the buoy radio link. Underwater operation, autonomous solar power, storage application and biofouling/tear classification remain future integration work.

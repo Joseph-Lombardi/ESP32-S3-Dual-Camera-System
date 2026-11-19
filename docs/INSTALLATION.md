@@ -6,7 +6,7 @@
 
 | Goal | Artifact | Availability |
 |---|---|---|
-| Reproduce the successful independent-SPI photo pair | Exact final capture sketch + exact final library | Not recovered; no substitute supplied |
+| Capture a USB-serial photo pair | `firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino` + matching Dual SPI library | Sketch supplied by author; deployed library version and hardware rerun pending |
 | Inspect/run the archived two-bus initialization experiment | `firmware/experimental_dual_bus/` | Source available, unverified; does not implement the photo protocol |
 | Exercise a dual-ring example | `firmware/led_ring_demo/led_ring_demo.ino` | Reference example, not the exact lab sketch |
 | Receive a pair from compatible capture firmware | `python/recibir_foto.py` | Supplied by author; hardware rerun still needed |
@@ -49,6 +49,14 @@ python python/recibir_foto.py
 Wait for `READY`. If opening the connection did not reset the board or the startup message was missed, reset the board while the receiver is waiting. Press Enter to request a pair; press S to leave. The receiver creates `imagenes/` in the current working directory and prints a path for each saved image.
 
 If reception fails, the script stops the capture loop rather than attempting to resynchronize an unknown binary stream. Exit, reset the ESP32-S3 and restart the script. Confirm the selected port and exclusive access. An “Access denied” error is not evidence that the camera failed. If endpoint protection flags a script, review the exact alert; do not disable protection as a general installation step.
+
+## Author-supplied USB capture sketch
+
+Open `firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino` in Arduino IDE. It requires a modified `Arducam_Mega` library that routes CS10 to FSPI (SCK12/MISO13/MOSI11) and CS21 to HSPI (SCK16/MISO17/MOSI18). The archived driver implements that mapping, but the author has not yet identified the exact library bytes deployed in the recorded successful run. The sketch itself sets CS pins; SPI signal pin initialization belongs to the library.
+
+Compile using the actual ESP32-S3 board/core and record its settings before uploading. This repository does not claim a successful firmware build or hardware rerun. After uploading, close all serial clients and start the Python receiver. Reset the board while Python waits for `READY` if necessary, then press Enter in Python to send `F`.
+
+The sketch captures CAM1 and CAM2 sequentially as VGA JPEGs, with a 500 ms delay between completed CAM1 transmission and the next capture. It sends at most 128 camera-buffer bytes per loop iteration and accepts a total length up to 2,000,000 bytes. It does not control the LED rings or MPU6050. The separate LED example remains independent.
 
 ## Experimental Arduino library setup
 

@@ -30,4 +30,4 @@ This is one active selection at a time. The code does not establish thread safet
 - `library.properties` was added from the inspected upstream baseline with a distinct experimental display name and description. This is packaging metadata, not a claim that the archive has been built or tested.
 - `LEEME_PI_LOM.txt` is retained as the original Spanish archive note.
 
-The independent FSPI/HSPI architecture agrees with the corrected project notes. No final capture implementation was synthesized to fill the missing-source gap. The final flashed sketch, final patch and board settings still need to be supplied before an exact reproduction is possible.
+The independent FSPI/HSPI architecture agrees with the corrected project notes. No final capture implementation was synthesized to fill the missing-source gap. The author has since supplied the [capture sketch](../firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino). The exact deployed library snapshot and board settings still need confirmation before an exact reproduction is possible.
