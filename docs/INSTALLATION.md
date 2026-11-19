@@ -2,6 +2,8 @@
 
 [Back to project](../README.md)
 
+> **Current version (2026-11-19):** the [integrated acquisition guide](CURRENT_ACQUISITION.md) supersedes the earlier USB-only/LED-only descriptions below. Current firmware includes two-camera capture, both LED rings and MPU6050 sampling; Python saves JPEGs plus inclination CSV. The package reports capture 0010; this update did not rerun hardware.
+
 ## Choose the right artifact
 
 | Goal | Artifact | Availability |
@@ -52,11 +54,11 @@ If reception fails, the script stops the capture loop rather than attempting to 
 
 ## Author-supplied USB capture sketch
 
-Open `firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino` in Arduino IDE. It requires a modified `Arducam_Mega` library that routes CS10 to FSPI (SCK12/MISO13/MOSI11) and CS21 to HSPI (SCK16/MISO17/MOSI18). The author has supplied the matching replacement `src` in `src(2).zip`; its 14 files match the repository source byte for byte. The sketch itself sets CS pins; SPI signal pin initialization belongs to the library.
+Open `firmware/LanternGuard_DualCam_LED_MPU6050/LanternGuard_DualCam_LED_MPU6050.ino` in Arduino IDE. It requires a modified `Arducam_Mega` library that routes CS10 to FSPI (SCK12/MISO13/MOSI11) and CS21 to HSPI (SCK16/MISO17/MOSI18). The author has supplied the matching replacement `src` in `src(2).zip`; its 14 files match the repository source byte for byte. The sketch itself sets CS pins; SPI signal pin initialization belongs to the library.
 
 Compile using the actual ESP32-S3 board/core and record its settings before uploading. This repository does not claim a successful firmware build or hardware rerun. After uploading, close all serial clients and start the Python receiver. Reset the board while Python waits for `READY` if necessary, then press Enter in Python to send `F`.
 
-The sketch captures CAM1 and CAM2 sequentially as VGA JPEGs, with a 500 ms delay between completed CAM1 transmission and the next capture. It sends at most 128 camera-buffer bytes per loop iteration and accepts a total length up to 2,000,000 bytes. It does not control the LED rings or MPU6050. The separate LED example remains independent.
+The sketch captures CAM1 and CAM2 sequentially as VGA JPEGs, with a 500 ms delay between completed CAM1 transmission and the next capture. It sends at most 128 camera-buffer bytes per loop iteration and accepts a total length up to 2,000,000 bytes. The earlier USB-only sketch does not control the LED rings or MPU6050. Use the current integrated sketch and guide linked above for those functions.
 
 ## Install Arducam Mega and replace its src folder
 
@@ -64,7 +66,7 @@ The sketch captures CAM1 and CAM2 sequentially as VGA JPEGs, with a 500 ms delay
 2. Close Arduino IDE and back up the installed `Arducam_Mega/src` folder outside the active library directory.
 3. Replace that entire `src` folder with the author-supplied `src` from `src(2).zip`. The same 14 files are available at [`firmware/experimental_dual_bus/Arducam_Mega/src`](../firmware/experimental_dual_bus/Arducam_Mega/src). Keep the library’s existing `library.properties`, license and other files. **Replace only `src`; do not create `src/src`.** Do not install the archived packaging as a second library.
 4. The resulting paths must include `Arducam_Mega/src/Arducam_Mega.h` and `Arducam_Mega/src/Arducam/ArducamSpi.cpp`. For a default Windows sketchbook, the library is usually under `Documents/Arduino/libraries/Arducam_Mega/`; use the sketchbook location configured in Arduino IDE if it differs, including a OneDrive location.
-5. Reopen Arduino IDE and open `firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino`. Select the actual ESP32-S3 board and record the core version and board/USB settings. Ensure the build resolves a single `Arducam_Mega.h` from the modified library.
+5. Reopen Arduino IDE and open `firmware/LanternGuard_DualCam_LED_MPU6050/LanternGuard_DualCam_LED_MPU6050.ino`. Select the actual ESP32-S3 board and record the core version and board/USB settings. Ensure the build resolves a single `Arducam_Mega.h` from the modified library.
 6. Compile, retain the full build output and upload after checking the [independent-bus wiring](WIRING.md). No compilation or hardware rerun is claimed here. Close serial clients before running `python/recibir_foto.py`.
 
 The driver initializes its own FSPI and HSPI objects internally. A separate global `SPI.begin(...)` call does not configure both objects. The optional `firmware/experimental_dual_bus/dual_bus_init/dual_bus_init.ino` is an earlier initialization-only diagnostic; use the USB capture sketch to transmit photographs.

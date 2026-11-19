@@ -2,7 +2,7 @@
 
 [Back to project](../README.md)
 
-This specification is supported by the **author-supplied receiver** and the newly supplied [USB capture sketch](../firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino). Static inspection confirms their command names, camera order, size limit and framing agree. Compilation and hardware interoperability have not been rerun here. The separate experimental initialization sketch does not implement this protocol.
+This specification is supported by the **author-supplied receiver** and the current [integrated capture sketch](../firmware/LanternGuard_DualCam_LED_MPU6050/LanternGuard_DualCam_LED_MPU6050.ino). Static inspection confirms their command names, camera order, size limit and framing agree. Compilation and hardware interoperability have not been rerun here. The separate experimental initialization sketch does not implement this protocol.
 
 ## Wire contract
 
@@ -16,7 +16,8 @@ This specification is supported by the **author-supplied receiver** and the newl
 | Board → PC | ASCII line `JPEG 2 M` | Validates camera 2 and its announced length |
 | Board → PC | Exactly M binary bytes | Consumes the complete payload |
 | Board → PC | ASCII line `END 2` | Must match the camera |
-| Board → PC | ASCII line `DONE` | Confirms the pair |
+| Board → PC, after `END 2` | `IMU <roll> <pitch>` or `IMU ERROR` | Parses angles or records missing inclination |
+| Board → PC | ASCII line `DONE` | Confirms the pair, then appends CSV |
 
 Each text record ends in LF; decoding strips surrounding whitespace, so CRLF text is accepted. The binary payload begins immediately after its header's line ending. **`END <id>` must begin immediately after the announced payload**, without a separate blank line between payload and END. For example, `...N payload bytes...END 1\n`. A separate newline there would be consumed as an empty line and rejected.
 
@@ -30,7 +31,9 @@ stateDiagram-v2
     End1 --> Header2: END 1
     Header2 --> Payload2: JPEG 2 M
     Payload2 --> End2: M bytes consumed
-    End2 --> Confirm: END 2
+    End2 --> Inclination: END 2
+    Inclination --> Confirm: IMU angles or IMU ERROR
+    End2 --> Confirm: legacy DONE
     Confirm --> Idle: DONE
     Header1 --> Abort: invalid header
     Payload1 --> Abort: truncated read
@@ -50,9 +53,13 @@ This is marker-based extraction, not full JPEG decoding or a checksum. A marker 
 
 If markers are missing, the raw block is saved as `camara<id>_<number>_invalida.bin`. Valid `.jpg` output uses exclusive creation (`xb`) to prevent overwriting. Pair numbering advances from the largest matching `camara1/2_<number>.jpg`; the regex was repaired from chat-format corruption. Invalid diagnostic `.bin` output retains the author's `write_bytes` behavior and may overwrite a same-named diagnostic. Only successfully decoded filenames influence the next number.
 
+## Current IMU and CSV behavior
+
+The current sketch samples inclination before the images, lights both rings for capture, then sends the stored sample after CAM2. Python recognizes `IMU ERROR` before parsing numerical `IMU` values. It appends CSV only after receiving `DONE`; missing inclination produces blank angles. Old firmware may omit IMU and send `DONE` directly. See [current acquisition](CURRENT_ACQUISITION.md) for timing and file columns.
+
 ## Capture sketch behavior
 
-The sketch starts serial at 115200 baud, waits 2000 ms and initializes both cameras. It emits `READY` only when both return `CAM_ERR_SUCCESS`. A trimmed `F` command triggers CAM1 capture/transmission, a 500 ms delay, CAM2 capture/transmission and `DONE`. Unknown commands are ignored.
+The sketch starts serial at 115200 baud, waits 2000 ms and initializes both cameras. It emits `READY` only when both return `CAM_ERR_SUCCESS`. A trimmed `F` command triggers CAM1 capture/transmission, a 500 ms delay, CAM2 capture/transmission, `IMU` and `DONE`. Unknown commands are ignored.
 
 Each `takePicture` requests VGA JPEG. `getTotalLength` must be in 1–2,000,000; `readBuff` is called with at most 128 bytes. Text records use Arduino `println` (CRLF), which the receiver accepts. There is no added newline between the binary payload and `END`.
 

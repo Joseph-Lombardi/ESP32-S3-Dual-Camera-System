@@ -2,6 +2,8 @@
 
 [Back to project](../README.md)
 
+> **Current version (2026-11-19):** the [integrated acquisition guide](CURRENT_ACQUISITION.md) supersedes the earlier USB-only/LED-only descriptions below. Current firmware includes two-camera capture, both LED rings and MPU6050 sampling; Python saves JPEGs plus inclination CSV. The package reports capture 0010; this update did not rerun hardware.
+
 ## Recover before claiming a reproducible hardware release
 
 The capture sketch and replacement Arducam Mega `src` have now been supplied and identified by the author. Record the installed library metadata, board/core settings and original camera JPEGs, then rerun the pair capture. Record hashes and versions. Reconcile actual camera-2 wiring with the source. Retain the original implementation before introducing improvements.

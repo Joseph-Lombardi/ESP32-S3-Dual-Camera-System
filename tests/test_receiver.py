@@ -1,4 +1,5 @@
 """Synthetic transport tests; no serial hardware or real photographs are used."""
+import csv
 import contextlib
 import importlib.util
 import io
@@ -56,6 +57,9 @@ class ReceiverTests(unittest.TestCase):
         self.old_folder = receiver.CARPETA
         receiver.CARPETA = Path(self.temp.name)
         self.addCleanup(setattr, receiver, "CARPETA", self.old_folder)
+        old_csv = receiver.ARCHIVO_CSV
+        receiver.ARCHIVO_CSV = receiver.CARPETA / "mediciones_mpu6050.csv"
+        self.addCleanup(setattr, receiver, "ARCHIVO_CSV", old_csv)
         self.stdout = contextlib.redirect_stdout(io.StringIO())
         self.stdout.__enter__()
         self.addCleanup(self.stdout.__exit__, None, None, None)
@@ -68,6 +72,34 @@ class ReceiverTests(unittest.TestCase):
         self.assertEqual((receiver.CARPETA / "camara1_0001.jpg").read_bytes(), JPEG1)
         self.assertEqual((receiver.CARPETA / "camara2_0001.jpg").read_bytes(), JPEG2)
         self.assertEqual(serial.read(1), b"")
+
+    def test_imu_values_append_csv_once_with_pair_names(self):
+        wire = frame(1, JPEG1) + frame(2, JPEG2) + b"IMU 66.52 1.31\nDONE\n"
+        receiver.capturar_dos(FakeSerial(wire))
+        receiver.capturar_dos(FakeSerial(wire))
+        with receiver.ARCHIVO_CSV.open(newline="", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["roll_grados"], "66.52")
+        self.assertEqual(rows[0]["pitch_grados"], "1.31")
+        self.assertEqual(rows[0]["camara1"], "camara1_0001.jpg")
+        self.assertEqual(rows[1]["camara2"], "camara2_0002.jpg")
+
+    def test_imu_error_still_saves_pair_and_blank_csv_angles(self):
+        wire = frame(1, JPEG1) + frame(2, JPEG2) + b"IMU ERROR\nDONE\n"
+        receiver.capturar_dos(FakeSerial(wire))
+        with receiver.ARCHIVO_CSV.open(newline="", encoding="utf-8") as f:
+            row = next(csv.DictReader(f))
+        self.assertEqual(row["roll_grados"], "")
+        self.assertEqual(row["pitch_grados"], "")
+        self.assertEqual(len(list(receiver.CARPETA.glob("*.jpg"))), 2)
+
+    def test_invalid_imu_or_missing_done_does_not_log_csv(self):
+        for tail in (b"IMU invalid 1\nDONE\n", b"IMU 1 2\n"):
+            with self.subTest(tail=tail):
+                with self.assertRaises((RuntimeError, TimeoutError)):
+                    receiver.capturar_dos(FakeSerial(frame(1, JPEG1) + frame(2, JPEG2) + tail))
+                self.assertFalse(receiver.ARCHIVO_CSV.exists())
 
     def test_truncated_binary_payload(self):
         with self.assertRaises(TimeoutError):
@@ -119,8 +151,8 @@ class ReceiverTests(unittest.TestCase):
         self.assertEqual(receiver.siguiente_numero(), 11)
 
     def test_firmware_error_and_ready(self):
-        with self.assertRaisesRegex(RuntimeError, "ERROR camera"):
-            receiver.esperar_ready(FakeSerial(b"ERROR camera\n"))
+        with self.assertRaisesRegex(RuntimeError, "ERROR INICIALIZACION"):
+            receiver.esperar_ready(FakeSerial(b"ERROR INICIALIZACION\n"))
         receiver.esperar_ready(FakeSerial(b"boot message\nREADY\n"))
         with self.assertRaisesRegex(RuntimeError, "ERROR capture"):
             receiver.capturar_dos(FakeSerial(b"ERROR capture\n"))

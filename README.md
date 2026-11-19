@@ -10,7 +10,9 @@ Embedded imaging case study by **Joseph Lombardi Quispe**, developed within the 
 
 This repository documents my work integrating two Arducam Mega cameras with a single ESP32-S3 controller: camera selection, SPI debugging, LED control and host-side JPEG reconstruction. It preserves the engineering evidence, the supplied Python receiver and the author-identified Arducam Mega source replacement with a reviewable upstream diff.
 
-**Current release status:** one JPEG pair was received over USB serial and opened on the PC. The author has now supplied the [USB capture sketch](firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino). It implements sequential VGA JPEG capture from both cameras and the receiver’s serial protocol. The author has identified the required Arducam Mega modification: replace its `src` folder with the [supplied source](firmware/experimental_dual_bus/Arducam_Mega/src). The 14 files in `src(2).zip` match the preserved source byte for byte. No firmware compilation or hardware rerun was performed for this publication.
+**Current acquisition version:** [firmware/LanternGuard_DualCam_LED_MPU6050/LanternGuard_DualCam_LED_MPU6050.ino](firmware/LanternGuard_DualCam_LED_MPU6050/LanternGuard_DualCam_LED_MPU6050.ino) integrates both independent SPI cameras, two WS2812B rings and MPU6050 inclination sampling. The matching [Python receiver](python/recibir_foto.py) saves two JPEGs and a CSV row per completed request. The supplied package reports successful capture **0010** on 2026-11-19 with roll **66.52°** and pitch **1.31°**. This is an author-reported bench result; no firmware compilation or hardware rerun was performed during this repository update.
+
+See [current acquisition and setup](docs/CURRENT_ACQUISITION.md) for the matching Arduino/Python pair. The earlier USB-only capture and initialization sketch remain historical examples.
 
 [Hardware & wiring](docs/WIRING.md) · [Installation](docs/INSTALLATION.md) · [Library changes](docs/ARDUCAM_PATCH.md) · [Serial protocol](docs/SERIAL_PROTOCOL.md) · [Validation](docs/VALIDATION_STATUS.md) · [Evidence gallery](docs/EVIDENCE.md)
 
@@ -35,10 +37,12 @@ flowchart TD
     MCU -->|"USB serial, 115200 baud"| PC["Python receiver"]
     PC --> J1["CAM1 JPEG"]
     PC --> J2["CAM2 JPEG"]
-    MCU -.->|"GPIO4 / GPIO5; separate bench test"| LED["Two LED rings"]
+    IMU["MPU6050: SDA8 / SCL7"] --> MCU
+    PC --> CSV["Inclination CSV"]
+    MCU -.->|"GPIO4 / GPIO5; capture illumination"| LED["Two LED rings"]
 ```
 
-The author confirms that the working arrangement uses **two independent SPI buses, each with its own SCK, MISO, MOSI and CS GPIOs**, on one ESP32-S3. The supplied library implements FSPI for CAM1 and HSPI for CAM2. The capture sketch and required library source have now both been supplied by the author; board/core settings and a new hardware run remain to be recorded. The log receives CAM1 before CAM2: **two images per request does not imply simultaneous exposure**. See the [wiring guide](docs/WIRING.md).
+The author confirms that the working arrangement uses **two independent SPI buses, each with its own SCK, MISO, MOSI and CS GPIOs**, on one ESP32-S3. The supplied library implements FSPI for CAM1 and HSPI for CAM2. The current capture sketch also samples inclination before capturing the pair and controls both rings; board/core settings and a new hardware run remain to be recorded. The log receives CAM1 before CAM2: **two images per request does not imply simultaneous exposure**. See the [wiring guide](docs/WIRING.md).
 
 LanternGuard's intended field architecture adds an underwater enclosure, an inclinometer, a cable to a buoy and a LoRa uplink. Those additions are not validated as an integrated system by the evidence here.
 
@@ -77,7 +81,7 @@ The recorded request completed as `Pareja 0001 recibida`. Both images were opene
 | Arducam Mega modification | Author supplied `src(2).zip` and specified replacing the installed library’s `src` folder |
 | [Offline JPEG utility](python/jpeg_extract_reference.py) | Reference-only utility, separate from the authentic receiver |
 
-The full [validation and recovery record](docs/VALIDATION_STATUS.md) explains what was checked. Host tests exercise synthetic serial data; they do not reproduce the hardware experiment. No compile success, endurance, energy consumption, simultaneous exposure or integrated dual-camera LoRa result is asserted.
+The full [validation and recovery record](docs/VALIDATION_STATUS.md) explains what was checked. Host tests exercise synthetic serial data; they do not reproduce the hardware experiment. No compile success, endurance, energy consumption, simultaneous exposure or integrated dual-camera LoRa result is asserted. The tables below retain the earlier photo-pair evidence; the current integrated source and capture 0010 report are described in the current acquisition guide.
 
 ## Hardware connections
 
@@ -94,7 +98,7 @@ Cameras were reported powered from 5 V with a common ground. The [wiring guide](
 
 ## Getting started
 
-1. Read the [source status](docs/VALIDATION_STATUS.md) and [installation guide](docs/INSTALLATION.md). Use `firmware/dual_camera_usb_capture/dual_camera_usb_capture.ino` for the author-supplied capture logic. The separate archived two-bus sketch only tests initialization.
+1. Read the [source status](docs/VALIDATION_STATUS.md) and [installation guide](docs/INSTALLATION.md). Use `firmware/LanternGuard_DualCam_LED_MPU6050/LanternGuard_DualCam_LED_MPU6050.ino` for the current integrated capture logic. The separate archived two-bus sketch only tests initialization.
 2. To use the Python receiver, compile and upload the capture sketch with the matching Dual SPI library, configure `PUERTO` in `python/recibir_foto.py` and install its dependency:
 
    ```bash
@@ -135,7 +139,8 @@ More detail: [debugging log](docs/DEBUGGING.md), [protocol limitations](docs/SER
 
 | Path | Purpose |
 |---|---|
-| `firmware/dual_camera_usb_capture/` | Author-supplied two-camera VGA JPEG capture and USB serial commands |
+| `firmware/LanternGuard_DualCam_LED_MPU6050/` | Current two-camera capture with LED control and MPU6050 sampling |
+| `firmware/dual_camera_usb_capture/` | Earlier USB-only capture retained as a historical example |
 | `firmware/experimental_dual_bus/` | Archived two-bus initialization experiment, source snapshot, MIT notice and upstream diff |
 | `firmware/led_ring_demo/` | Reference-only dual-ring example |
 | `python/recibir_foto.py` | Author-supplied serial receiver with normalized chat formatting |
@@ -154,4 +159,4 @@ Arducam's original camera library is credited to **Arducam Technology co., Ltd.*
 
 ## Next milestones
 
-Record board/core settings and rerun the supplied capture sketch with the author-identified Dual SPI library source; retain original JPEGs and serial dumps; investigate the bytes outside each JPEG; measure illumination and energy; repeat capture pairs with timestamps; then integrate inclination sensing and the buoy radio link. Underwater operation, autonomous solar power, storage application and biofouling/tear classification remain future integration work.
+Record board/core settings and rerun the supplied capture sketch with the author-identified Dual SPI library source; retain original JPEGs and serial dumps; investigate the bytes outside each JPEG; measure illumination and energy; repeat capture pairs with timestamps; then validate inclination calibration and integrate the buoy radio link. Underwater operation, autonomous solar power, storage application and biofouling/tear classification remain future integration work.

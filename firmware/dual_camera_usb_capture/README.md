@@ -1,4 +1,6 @@
-# Dual-camera USB capture
+# Earlier dual-camera USB-only capture
+
+This historical sketch predates LED/MPU6050 integration. For current acquisition use [LanternGuard_DualCam_LED_MPU6050](../LanternGuard_DualCam_LED_MPU6050/LanternGuard_DualCam_LED_MPU6050.ino) and the [current guide](../../docs/CURRENT_ACQUISITION.md).
 
 [Back to project](../../README.md)
 
