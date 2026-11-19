@@ -1,0 +1,17 @@
+PI LOM - Prueba experimental de dos buses SPI independientes.
+
+CAM1: CS=10, SCK=12, MISO=13, MOSI=11.
+CAM2: CS=21, SCK=16, MISO=17, MOSI=18.
+Alimentacion compatible con las camaras y GND comun.
+
+1. Con ESP32 apagado, verificar el cableado y alimentacion.
+2. Respaldar la carpeta src original de la biblioteca Arducam_Mega.
+3. Reemplazar src por la carpeta src incluida en este ZIP.
+4. Cerrar y reabrir Arduino IDE.
+5. Abrir prueba_dos_camaras.ino y seleccionar ESP32S3 Dev Module.
+6. Cargar el sketch y abrir Monitor Serie a 115200 baudios.
+
+No agregar SPI.begin() en el sketch: esta version gestiona FSPI y HSPI.
+No modificar los otros archivos de la biblioteca.
+Si se queda en begin(), desconectar USB y revisar el cableado antes de continuar.
+Esta variante no se ha validado fisicamente ni compilado en Arduino IDE.
